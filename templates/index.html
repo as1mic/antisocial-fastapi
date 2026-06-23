@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiSocial - Feed</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=14">
+</head>
+<body data-page="feed">
+    <div class="page-shell">
+        <header class="site-header">
+            <div>
+                <h1 class="brand">AntiSocial</h1>
+                <p class="header-subtitle">A simple social feed for sharing failures.</p>
+            </div>
+            <nav class="top-nav">
+                <a class="nav-link active" href="/">Feed</a>
+                <a class="nav-link" href="/create-post">Create post</a>
+                <a class="nav-link" href="/profile">Profile</a>
+                <a class="nav-link" href="/auth">Auth</a>
+            </nav>
+            <div class="header-actions">
+                <span id="session-badge" class="session-badge">Guest mode</span>
+                <button id="logout-button" class="ghost-button hidden" type="button">Log out</button>
+            </div>
+        </header>
+
+        <main class="layout">
+            <section class="hero-card">
+                <div class="card-head">
+                    <div>
+                        <h2>What this app does</h2>
+                        <p class="section-subtitle">A quick overview of the main features.</p>
+                    </div>
+                </div>
+                <div class="hero-list">
+                    <div class="hero-row">
+                        <strong>Post</strong>
+                        <span>Share a short story about what went wrong.</span>
+                    </div>
+                    <div class="hero-row">
+                        <strong>React</strong>
+                        <span>Leave simple reactions on other people's posts.</span>
+                    </div>
+                    <div class="hero-row">
+                        <strong>Profile</strong>
+                        <span>See your score, haters, achievements, and own posts.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="card-head">
+                    <div>
+                        <h2>Leaderboard</h2>
+                        <p class="section-subtitle">Users with the highest score.</p>
+                    </div>
+                </div>
+                <div id="rating-list" class="simple-list"></div>
+            </section>
+
+            <section class="workspace feed-workspace">
+                <div class="workspace-main">
+                    <section class="panel feed-panel">
+                        <div class="card-head">
+                            <div>
+                                <h2>Feed</h2>
+                                <p class="section-subtitle">Latest public posts from the community.</p>
+                            </div>
+                        </div>
+
+                        <form id="filter-form" class="filters">
+                            <input id="search-input" type="text" placeholder="Search in posts">
+                            <select id="filter-category">
+                                <option value="">All categories</option>
+                                <option value="university">University</option>
+                                <option value="work">Work</option>
+                                <option value="transport">Transport</option>
+                                <option value="relationships">Relationships</option>
+                                <option value="money">Money</option>
+                                <option value="random">Random</option>
+                            </select>
+                            <button class="secondary-button" type="submit">Apply</button>
+                        </form>
+
+                        <div id="feed-list" class="feed-list"></div>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+    <div id="post-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closePostModal()"></div>
+        <div class="modal-card">
+            <button class="modal-close" type="button" onclick="closePostModal()">Close</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+    <script src="/static/js/main.js?v=14"></script>
+</body>
+</html>

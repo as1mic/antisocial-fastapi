@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiSocial - Create Post</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=14">
+</head>
+<body data-page="create-post">
+    <div class="page-shell">
+        <header class="site-header">
+            <div>
+                <h1 class="brand">AntiSocial</h1>
+                <p class="header-subtitle">Create a new public failure post.</p>
+            </div>
+            <nav class="top-nav">
+                <a class="nav-link" href="/">Feed</a>
+                <a class="nav-link active" href="/create-post">Create post</a>
+                <a class="nav-link" href="/profile">Profile</a>
+                <a class="nav-link" href="/auth">Auth</a>
+            </nav>
+            <div class="header-actions">
+                <span id="session-badge" class="session-badge">Guest mode</span>
+                <button id="logout-button" class="ghost-button hidden" type="button">Log out</button>
+            </div>
+        </header>
+
+        <main class="single-column">
+            <section class="panel create-page-card">
+                <div class="card-head">
+                    <div>
+                        <h2>Create post</h2>
+                        <p class="section-subtitle">Write a short story and publish it to the feed.</p>
+                    </div>
+                </div>
+
+                <form id="post-form" class="stack">
+                    <label class="field">
+                        <span>Title</span>
+                        <input id="post-title" type="text" maxlength="150" placeholder="Missed my exam in the wrong building" required>
+                    </label>
+                    <label class="field">
+                        <span>Image URL</span>
+                        <input id="post-image-url" type="url" placeholder="https://example.com/image.jpg">
+                    </label>
+                    <label class="field">
+                        <span>Story</span>
+                        <textarea id="post-content" rows="7" placeholder="Describe the disaster..." required></textarea>
+                    </label>
+                    <div class="inline-form">
+                        <label class="field">
+                            <span>Category</span>
+                            <select id="post-category">
+                                <option value="university">University</option>
+                                <option value="work">Work</option>
+                                <option value="transport">Transport</option>
+                                <option value="relationships">Relationships</option>
+                                <option value="money">Money</option>
+                                <option value="random">Random</option>
+                            </select>
+                        </label>
+                        <button class="primary-button wide-on-mobile" type="submit">Publish</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+    <script src="/static/js/main.js?v=14"></script>
+</body>
+</html>

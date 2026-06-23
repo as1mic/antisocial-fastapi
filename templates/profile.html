@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiSocial - Profile</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=14">
+</head>
+<body data-page="profile">
+    <div class="page-shell">
+        <header class="site-header">
+            <div>
+                <h1 class="brand">AntiSocial</h1>
+                <p class="header-subtitle">Profile details, score, achievements, and your posts.</p>
+            </div>
+            <nav class="top-nav">
+                <a class="nav-link" href="/">Feed</a>
+                <a class="nav-link" href="/create-post">Create post</a>
+                <a class="nav-link active" href="/profile">Profile</a>
+                <a class="nav-link" href="/auth">Auth</a>
+            </nav>
+            <div class="header-actions">
+                <span id="session-badge" class="session-badge">Guest mode</span>
+                <button id="logout-button" class="ghost-button hidden" type="button">Log out</button>
+            </div>
+        </header>
+
+        <main class="layout profile-layout">
+            <section class="panel profile-panel">
+                <div class="card-head">
+                    <div>
+                        <h2 id="profile-name">Your profile</h2>
+                        <p class="section-subtitle">Basic account information and stats.</p>
+                    </div>
+                    <div class="profile-actions-row">
+                        <a class="primary-link-button" href="/create-post">Create post</a>
+                        <button id="edit-profile-button" class="ghost-button" type="button">Edit</button>
+                    </div>
+                </div>
+
+                <p id="profile-bio" class="muted-text">Log in to load your profile.</p>
+
+                <div class="stats-grid">
+                    <article>
+                        <span class="stat-number" id="profile-haters">0</span>
+                        <span class="stat-label">Haters</span>
+                    </article>
+                    <article>
+                        <span class="stat-number" id="profile-posts">0</span>
+                        <span class="stat-label">Posts</span>
+                    </article>
+                    <article>
+                        <span class="stat-number" id="profile-score">0</span>
+                        <span class="stat-label">Score</span>
+                    </article>
+                </div>
+
+                <form id="profile-form" class="stack hidden">
+                    <label class="field">
+                        <span>Username</span>
+                        <input id="profile-username" type="text">
+                    </label>
+                    <label class="field">
+                        <span>Email</span>
+                        <input id="profile-email" type="email">
+                    </label>
+                    <label class="field">
+                        <span>Bio</span>
+                        <textarea id="profile-bio-input" rows="3"></textarea>
+                    </label>
+                    <div class="button-row">
+                        <button class="primary-button" type="submit">Save</button>
+                        <button id="cancel-profile-edit" class="ghost-button" type="button">Cancel</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="card-head">
+                    <div>
+                        <h2>Achievements</h2>
+                        <p class="section-subtitle">Unlocked profile milestones.</p>
+                    </div>
+                </div>
+                <div id="achievement-list" class="simple-list"></div>
+            </section>
+
+            <section class="panel profile-posts-panel">
+                <div class="card-head">
+                    <div>
+                        <h2>Your posts</h2>
+                        <p class="section-subtitle">Posts published from your account.</p>
+                    </div>
+                </div>
+                <div id="profile-posts-list" class="feed-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+    <div id="post-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closePostModal()"></div>
+        <div class="modal-card">
+            <button class="modal-close" type="button" onclick="closePostModal()">Close</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+    <script src="/static/js/main.js?v=14"></script>
+</body>
+</html>

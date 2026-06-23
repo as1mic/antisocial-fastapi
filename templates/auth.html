@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiSocial - Auth</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=14">
+</head>
+<body data-page="auth">
+    <div class="page-shell">
+        <header class="site-header">
+            <div>
+                <h1 class="brand">AntiSocial</h1>
+                <p class="header-subtitle">Sign in or create a new account.</p>
+            </div>
+            <nav class="top-nav">
+                <a class="nav-link" href="/">Feed</a>
+                <a class="nav-link" href="/create-post">Create post</a>
+                <a class="nav-link" href="/profile">Profile</a>
+                <a class="nav-link active" href="/auth">Auth</a>
+            </nav>
+            <div class="header-actions">
+                <span id="session-badge" class="session-badge">Guest mode</span>
+                <button id="logout-button" class="ghost-button hidden" type="button">Log out</button>
+            </div>
+        </header>
+
+        <main class="single-column">
+            <section class="auth-card auth-page-card">
+                <div class="card-head">
+                    <div>
+                        <h2>Sign in</h2>
+                        <p class="section-subtitle">Use your username or email to enter the app.</p>
+                    </div>
+                    <div class="segmented-control">
+                        <button id="show-login" class="segment active" type="button">Login</button>
+                        <button id="show-register" class="segment" type="button">Register</button>
+                    </div>
+                </div>
+
+                <form id="login-form" class="stack">
+                    <label class="field">
+                        <span>Username or email</span>
+                        <input id="login-value" type="text" placeholder="doomguy or demo@example.com" required>
+                    </label>
+                    <label class="field">
+                        <span>Password</span>
+                        <input id="login-password" type="password" placeholder="Your password" required>
+                    </label>
+                    <button class="primary-button" type="submit">Login</button>
+                </form>
+
+                <form id="register-form" class="stack hidden">
+                    <label class="field">
+                        <span>Username</span>
+                        <input id="register-username" type="text" placeholder="Choose a username" required>
+                    </label>
+                    <label class="field">
+                        <span>Email</span>
+                        <input id="register-email" type="email" placeholder="name@example.com" required>
+                    </label>
+                    <label class="field">
+                        <span>Password</span>
+                        <input id="register-password" type="password" placeholder="Create a password" required>
+                    </label>
+                    <label class="field">
+                        <span>Bio</span>
+                        <textarea id="register-bio" rows="3" placeholder="Tell the world how badly things are going."></textarea>
+                    </label>
+                    <button class="primary-button" type="submit">Create account</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+    <script src="/static/js/main.js?v=14"></script>
+</body>
+</html>

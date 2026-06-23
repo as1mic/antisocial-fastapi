@@ -72,6 +72,11 @@ def profile_page():
     return FileResponse(TEMPLATES_DIR / "profile.html")
 
 
+@app.get("/user/{user_id}")
+def user_page(user_id: int):
+    return FileResponse(TEMPLATES_DIR / "user.html")
+
+
 @app.get("/post/{post_id}")
 def post_page(post_id: int):
     return FileResponse(TEMPLATES_DIR / "post.html")

@@ -407,6 +407,15 @@ textarea {
     letter-spacing: -0.01em;
 }
 
+.author-link {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.author-link:hover {
+    color: var(--blue);
+}
+
 .post-category {
     display: inline-block;
     margin-top: 6px;

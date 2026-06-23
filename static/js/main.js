@@ -27,6 +27,10 @@ function postPageUrl(postId) {
     return `/post/${postId}`;
 }
 
+function userPageUrl(userId) {
+    return `/user/${userId}`;
+}
+
 function editPostPageUrl(postId) {
     return `/post/${postId}/edit`;
 }
@@ -170,7 +174,7 @@ function renderRating(users) {
     container.innerHTML = users.map((user, index) => `
         <div class="list-row">
             <div>
-                <strong>#${index + 1} @${escapeHtml(user.username)}</strong>
+                <strong>#${index + 1} <a class="author-link" href="${userPageUrl(user.user_id)}">@${escapeHtml(user.username)}</a></strong>
                 <span>${user.posts_count} posts, ${user.haters_count} haters</span>
             </div>
             <strong>${user.score}</strong>
@@ -261,7 +265,7 @@ function renderPostCard(post) {
         <article class="post-card">
             <div class="post-topline">
                 <div>
-                    <div class="post-author">@${escapeHtml(post.author_username || "unknown")}</div>
+                    <div class="post-author"><a class="author-link" href="${userPageUrl(post.author_id)}">@${escapeHtml(post.author_username || "unknown")}</a></div>
                     <span class="post-category">${escapeHtml(post.category)}</span>
                 </div>
                 <span class="muted-text">${formatDate(post.created_at)}</span>
@@ -441,9 +445,69 @@ async function loadFeedPage() {
     await loadFeedPosts();
 }
 
+async function loadUserPage() {
+    if (!requireAuth()) {
+        return;
+    }
+
+    await loadCurrentUser();
+
+    const userId = currentUserIdFromUrl();
+    if (!userId) {
+        showMessage("User not found.", true);
+        return;
+    }
+
+    try {
+        const profile = await apiFetch(`/users/${userId}`);
+        const posts = await apiFetch(`/users/${userId}/posts`);
+        const rating = await apiFetch("/users/rating");
+        const achievements = await apiFetch(`/users/${userId}/achievements`);
+        const userRating = rating.find((item) => item.user_id === userId);
+        const isOwnProfile = state.currentUser && state.currentUser.id === userId;
+        const hateFollowButton = element("hate-follow-button");
+
+        element("view-user-name").textContent = `@${profile.username}`;
+        element("view-user-bio").textContent = profile.bio || "No bio yet.";
+        element("view-user-haters").textContent = String(profile.haters_count);
+        element("view-user-posts-count").textContent = String(posts.length);
+        element("view-user-score").textContent = userRating ? String(userRating.score) : "0";
+
+        if (hateFollowButton) {
+            if (isOwnProfile) {
+                hateFollowButton.classList.add("hidden");
+            } else {
+                hateFollowButton.classList.remove("hidden");
+                hateFollowButton.textContent = profile.is_hated_by_current_user
+                    ? "Remove hate-follow"
+                    : "Hate-follow";
+            }
+        }
+
+        state.posts = [];
+        for (const post of posts) {
+            state.posts.push({
+                ...post,
+                my_reaction: "",
+            });
+        }
+
+        await loadReactionSelections(state.posts);
+        renderFeed(state.posts, "user-posts-list");
+        renderAchievements(achievements);
+    } catch (error) {
+        showMessage(error.message, true);
+    }
+}
+
 async function reloadCurrentPage() {
     if (pageName() === "profile") {
         await loadProfilePage();
+        return;
+    }
+
+    if (pageName() === "user") {
+        await loadUserPage();
         return;
     }
 
@@ -596,6 +660,35 @@ async function handleLogout() {
     saveToken("");
     state.currentUser = null;
     window.location.href = "/auth";
+}
+
+async function toggleHateFollow() {
+    const userId = currentUserIdFromUrl();
+    if (!userId) {
+        return;
+    }
+
+    const button = element("hate-follow-button");
+    if (button) {
+        button.disabled = true;
+    }
+
+    try {
+        const shouldRemove = button && button.textContent === "Remove hate-follow";
+
+        await apiFetch(`/users/${userId}/hate-follow`, {
+            method: shouldRemove ? "DELETE" : "POST",
+        });
+
+        await loadUserPage();
+        showMessage(shouldRemove ? "Hate-follow removed." : "Hate-follow added.");
+    } catch (error) {
+        showMessage(error.message, true);
+    } finally {
+        if (button) {
+            button.disabled = false;
+        }
+    }
 }
 
 function showLoginForm() {
@@ -919,6 +1012,19 @@ function currentPostIdFromUrl() {
     return 0;
 }
 
+function currentUserIdFromUrl() {
+    const parts = window.location.pathname.split("/").filter(Boolean);
+
+    for (let index = parts.length - 1; index >= 0; index -= 1) {
+        const value = Number(parts[index]);
+        if (Number.isInteger(value) && value > 0) {
+            return value;
+        }
+    }
+
+    return 0;
+}
+
 function renderSinglePost(post) {
     const container = element("single-post-view");
     if (!container) {
@@ -942,7 +1048,7 @@ function renderSinglePost(post) {
             <article class="post-card">
                 <div class="post-topline">
                     <div>
-                        <div class="post-author">@${escapeHtml(post.author_username || "unknown")}</div>
+                        <div class="post-author"><a class="author-link" href="${userPageUrl(post.author_id)}">@${escapeHtml(post.author_username || "unknown")}</a></div>
                         <span class="post-category">${escapeHtml(post.category)}</span>
                     </div>
                     <span class="muted-text">${formatDate(post.created_at)}</span>
@@ -1076,6 +1182,15 @@ function initEditPostPage() {
     element("edit-post-form").addEventListener("submit", handleEditPostSubmit);
 }
 
+function initUserPage() {
+    loadUserPage();
+
+    const hateFollowButton = element("hate-follow-button");
+    if (hateFollowButton) {
+        hateFollowButton.addEventListener("click", toggleHateFollow);
+    }
+}
+
 window.submitReaction = submitReaction;
 window.toggleComments = toggleComments;
 window.submitComment = submitComment;
@@ -1113,4 +1228,8 @@ if (currentPage === "post") {
 
 if (currentPage === "edit-post") {
     initEditPostPage();
+}
+
+if (currentPage === "user") {
+    initUserPage();
 }

@@ -270,6 +270,23 @@ textarea {
     background: var(--blue-hover);
 }
 
+.ghost-link-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.ghost-link-button:hover {
+    background: var(--panel-2);
+    color: var(--text);
+}
+
 .secondary-button {
     padding: 11px 14px;
     border: 1px solid var(--border);
@@ -345,6 +362,10 @@ textarea {
 
 .profile-posts-panel {
     grid-column: 1 / -1;
+}
+
+.post-page-layout {
+    max-width: 860px;
 }
 
 .feed-list,
@@ -430,6 +451,12 @@ textarea {
 
 .inline-actions,
 .comment-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.post-primary-actions {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
@@ -636,6 +663,11 @@ textarea {
 
 .modal-comment-form {
     margin-bottom: 12px;
+}
+
+.single-post-shell {
+    display: grid;
+    gap: 16px;
 }
 
 .hidden {

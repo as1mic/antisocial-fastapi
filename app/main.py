@@ -72,6 +72,11 @@ def profile_page():
     return FileResponse(TEMPLATES_DIR / "profile.html")
 
 
+@app.get("/post/{post_id}")
+def post_page(post_id: int):
+    return FileResponse(TEMPLATES_DIR / "post.html")
+
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}

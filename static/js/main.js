@@ -21,6 +21,10 @@ function pageName() {
     return document.body.dataset.page || "";
 }
 
+function postPageUrl(postId) {
+    return `/post/${postId}`;
+}
+
 function showMessage(text, isError = false) {
     const box = element("message-box");
     if (!box) {
@@ -267,9 +271,12 @@ function renderPostCard(post) {
             </div>
 
             <div class="post-actions-row">
-                <button class="comment-toggle" type="button" onclick="openPostModal(${post.id})">
-                    Open post
-                </button>
+                <div class="post-primary-actions">
+                    <a class="ghost-link-button" href="${postPageUrl(post.id)}">Open page</a>
+                    <button class="comment-toggle" type="button" onclick="openPostModal(${post.id})">
+                        Quick view
+                    </button>
+                </div>
                 <div class="inline-actions">
                     ${manageButtons}
                 </div>
@@ -402,6 +409,20 @@ async function loadFeedPage() {
     await loadFeedPosts();
 }
 
+async function reloadCurrentPage() {
+    if (pageName() === "profile") {
+        await loadProfilePage();
+        return;
+    }
+
+    if (pageName() === "post") {
+        await loadPostPage();
+        return;
+    }
+
+    await loadFeedPosts();
+}
+
 async function handleLogin(event) {
     event.preventDefault();
 
@@ -531,11 +552,7 @@ async function submitReaction(postId, reactionType) {
             body: JSON.stringify({ reaction_type: reactionType }),
         });
 
-        if (pageName() === "profile") {
-            await loadProfilePage();
-        } else {
-            await loadFeedPosts();
-        }
+        await reloadCurrentPage();
 
         showMessage("Reaction saved.");
     } catch (error) {
@@ -581,11 +598,7 @@ async function submitComment(event, postId) {
         await reloadCommentsForPost(postId);
         input.value = "";
 
-        if (pageName() === "profile") {
-            await loadProfilePage();
-        } else {
-            await loadFeedPosts();
-        }
+        await reloadCurrentPage();
     } catch (error) {
         showMessage(error.message, true);
     }
@@ -623,11 +636,7 @@ async function editPost(postId) {
             }),
         });
 
-        if (pageName() === "profile") {
-            await loadProfilePage();
-        } else {
-            await loadFeedPosts();
-        }
+        await reloadCurrentPage();
 
         if (state.openModalPostId === postId) {
             await openPostModal(postId);
@@ -653,11 +662,12 @@ async function deletePost(postId) {
             closePostModal();
         }
 
-        if (pageName() === "profile") {
-            await loadProfilePage();
-        } else {
-            await loadFeedPosts();
+        if (pageName() === "post") {
+            window.location.href = "/";
+            return;
         }
+
+        await reloadCurrentPage();
 
         showMessage("Post deleted.");
     } catch (error) {
@@ -692,12 +702,7 @@ async function editComment(commentId) {
         });
 
         await reloadCommentsForPost(targetComment.post_id);
-
-        if (pageName() === "profile") {
-            await loadProfilePage();
-        } else {
-            await loadFeedPosts();
-        }
+        await reloadCurrentPage();
 
         showMessage("Comment updated.");
     } catch (error) {
@@ -717,12 +722,7 @@ async function deleteComment(commentId, postId) {
         });
 
         await reloadCommentsForPost(postId);
-
-        if (pageName() === "profile") {
-            await loadProfilePage();
-        } else {
-            await loadFeedPosts();
-        }
+        await reloadCurrentPage();
 
         showMessage("Comment deleted.");
     } catch (error) {
@@ -876,6 +876,97 @@ function initFeedPage() {
     });
 }
 
+function currentPostIdFromUrl() {
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    return Number(parts[parts.length - 1] || 0);
+}
+
+function renderSinglePost(post) {
+    const container = element("single-post-view");
+    if (!container) {
+        return;
+    }
+
+    const comments = state.commentsByPost[post.id] || [];
+    const imageHtml = post.image_url
+        ? `<img class="post-image" src="${escapeHtml(post.image_url)}" alt="Post image">`
+        : "";
+    const canManage = state.currentUser && state.currentUser.id === post.author_id;
+    const manageButtons = canManage
+        ? `
+            <button class="ghost-button small-button" type="button" onclick="editPost(${post.id})">Edit</button>
+            <button class="ghost-button delete-button small-button" type="button" onclick="deletePost(${post.id})">Delete</button>
+        `
+        : "";
+
+    container.innerHTML = `
+        <div class="single-post-shell">
+            <article class="post-card">
+                <div class="post-topline">
+                    <div>
+                        <div class="post-author">@${escapeHtml(post.author_username || "unknown")}</div>
+                        <span class="post-category">${escapeHtml(post.category)}</span>
+                    </div>
+                    <span class="muted-text">${formatDate(post.created_at)}</span>
+                </div>
+
+                <h1 class="post-title">${escapeHtml(post.title)}</h1>
+                <p class="post-body">${escapeHtml(post.content)}</p>
+                ${imageHtml}
+
+                <div class="post-meta">
+                    <span>${post.comments_count} comments</span>
+                    <span>${post.reactions_count} reactions</span>
+                </div>
+
+                <div class="reaction-row">
+                    ${renderReactionButton(post, "tough")}
+                    ${renderReactionButton(post, "your_fault")}
+                    ${renderReactionButton(post, "had_worse")}
+                    ${renderReactionButton(post, "rest_in_peace")}
+                </div>
+
+                <div class="post-actions-row">
+                    <div class="inline-actions">
+                        ${manageButtons}
+                    </div>
+                </div>
+            </article>
+
+            <section class="comment-section">
+                <h3>Comments</h3>
+                <form class="comment-form" onsubmit="submitComment(event, ${post.id})">
+                    <textarea id="comment-input-${post.id}" placeholder="Write a comment..." required></textarea>
+                    <button class="secondary-button" type="submit">Send</button>
+                </form>
+                <div id="comment-list-${post.id}">
+                    ${renderComments(comments)}
+                </div>
+            </section>
+        </div>
+    `;
+}
+
+async function loadPostPage() {
+    await loadCurrentUser();
+
+    const postId = currentPostIdFromUrl();
+    if (!postId) {
+        showMessage("Post not found.", true);
+        return;
+    }
+
+    try {
+        const post = await apiFetch(`/posts/${postId}`);
+        state.posts = [{ ...post, my_reaction: "" }];
+        state.commentsByPost[postId] = await apiFetch(`/posts/${postId}/comments`);
+        await loadReactionSelections(state.posts);
+        renderSinglePost(state.posts[0]);
+    } catch (error) {
+        showMessage(error.message, true);
+    }
+}
+
 function initProfilePage() {
     loadProfilePage();
     const editButton = element("edit-profile-button");
@@ -889,6 +980,10 @@ function initProfilePage() {
         profileForm.classList.add("hidden");
     });
     profileForm.addEventListener("submit", handleProfileUpdate);
+}
+
+function initPostPage() {
+    loadPostPage();
 }
 
 window.submitReaction = submitReaction;
@@ -920,4 +1015,8 @@ if (currentPage === "feed") {
 
 if (currentPage === "profile") {
     initProfilePage();
+}
+
+if (currentPage === "post") {
+    initPostPage();
 }

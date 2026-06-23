@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiSocial - Post</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=15">
+</head>
+<body data-page="post">
+    <div class="page-shell">
+        <header class="site-header">
+            <div>
+                <h1 class="brand">AntiSocial</h1>
+                <p class="header-subtitle">Single post view with full discussion.</p>
+            </div>
+            <nav class="top-nav">
+                <a class="nav-link" href="/">Feed</a>
+                <a class="nav-link" href="/create-post">Create post</a>
+                <a class="nav-link" href="/profile">Profile</a>
+                <a class="nav-link" href="/auth">Auth</a>
+            </nav>
+            <div class="header-actions">
+                <span id="session-badge" class="session-badge">Guest mode</span>
+                <button id="logout-button" class="ghost-button hidden" type="button">Log out</button>
+            </div>
+        </header>
+
+        <main class="single-column post-page-layout">
+            <section class="panel">
+                <div class="card-head">
+                    <div>
+                        <h2>Post</h2>
+                        <p class="section-subtitle">Full post content, reactions, and comments.</p>
+                    </div>
+                    <a class="ghost-link-button" href="/">Back to feed</a>
+                </div>
+                <div id="single-post-view"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+    <script src="/static/js/main.js?v=15"></script>
+</body>
+</html>

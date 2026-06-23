@@ -9,6 +9,7 @@ from app.core.helpers import get_post_or_404
 from app.models.comment import Comment
 from app.models.post import Post
 from app.models.reaction import Reaction
+from app.models.saved_post import SavedPost
 from app.models.user import User
 from app.schemas.post import PostCategory, PostOut, PostSort, PostUpdate
 from app.services.achievement_service import evaluate_user_achievements
@@ -117,6 +118,33 @@ def list_posts(
     )
 
 
+@router.get("/saved", response_model=list[PostOut])
+def list_saved_posts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return (
+        db.query(Post)
+        .join(SavedPost, SavedPost.post_id == Post.id)
+        .filter(SavedPost.user_id == current_user.id)
+        .order_by(SavedPost.created_at.desc())
+        .all()
+    )
+
+
+@router.get("/saved/ids", response_model=list[int])
+def list_saved_post_ids(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    rows = (
+        db.query(SavedPost.post_id)
+        .filter(SavedPost.user_id == current_user.id)
+        .all()
+    )
+    return [row.post_id for row in rows]
+
+
 @router.get("/{post_id}", response_model=PostOut)
 def get_post(post_id: int, db: Session = Depends(get_db)):
     return get_post_or_404(db, post_id)
@@ -153,6 +181,66 @@ def update_post(
     db.refresh(post)
 
     return post
+
+
+@router.post("/{post_id}/save", status_code=status.HTTP_201_CREATED)
+def save_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    get_post_or_404(db, post_id)
+
+    existing_saved_post = (
+        db.query(SavedPost)
+        .filter(
+            SavedPost.user_id == current_user.id,
+            SavedPost.post_id == post_id,
+        )
+        .first()
+    )
+
+    if existing_saved_post is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Post is already saved",
+        )
+
+    saved_post = SavedPost(
+        user_id=current_user.id,
+        post_id=post_id,
+    )
+    db.add(saved_post)
+    db.commit()
+
+    return {"message": "Post saved successfully"}
+
+
+@router.delete("/{post_id}/save", status_code=status.HTTP_200_OK)
+def remove_saved_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    saved_post = (
+        db.query(SavedPost)
+        .filter(
+            SavedPost.user_id == current_user.id,
+            SavedPost.post_id == post_id,
+        )
+        .first()
+    )
+
+    if saved_post is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Saved post not found",
+        )
+
+    db.delete(saved_post)
+    db.commit()
+
+    return {"message": "Saved post removed successfully"}
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_200_OK)

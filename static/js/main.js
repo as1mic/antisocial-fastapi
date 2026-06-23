@@ -2,6 +2,7 @@ const state = {
     token: localStorage.getItem("antisocial_token") || "",
     currentUser: null,
     posts: [],
+    savedPostIds: [],
     commentsByPost: {},
     openModalPostId: null,
     feedPageSize: 6,
@@ -136,6 +137,7 @@ async function reloadCommentsForPost(postId) {
 async function loadCurrentUser() {
     if (!state.token) {
         state.currentUser = null;
+        state.savedPostIds = [];
         updateHeader();
         return null;
     }
@@ -158,6 +160,19 @@ function requireAuth(redirectPath = "/auth") {
         return false;
     }
     return true;
+}
+
+async function loadSavedPostIds() {
+    if (!state.token) {
+        state.savedPostIds = [];
+        return;
+    }
+
+    state.savedPostIds = await apiFetch("/posts/saved/ids");
+}
+
+function isPostSaved(postId) {
+    return state.savedPostIds.includes(postId);
 }
 
 function renderRating(users) {
@@ -248,6 +263,22 @@ function renderReactionButton(post, type) {
     `;
 }
 
+function renderSaveButton(postId) {
+    const saved = isPostSaved(postId);
+    const activeClass = saved ? "active" : "";
+    const label = saved ? "Saved" : "Save";
+
+    return `
+        <button
+            class="ghost-button small-button ${activeClass}"
+            type="button"
+            onclick="toggleSavedPost(${postId})"
+        >
+            ${label}
+        </button>
+    `;
+}
+
 function renderPostCard(post) {
     const comments = state.commentsByPost[post.id] || [];
     const imageHtml = post.image_url
@@ -288,6 +319,7 @@ function renderPostCard(post) {
                     </button>
                 </div>
                 <div class="inline-actions">
+                    ${renderSaveButton(post.id)}
                     ${manageButtons}
                 </div>
             </div>
@@ -409,6 +441,7 @@ async function loadProfilePage() {
     }
 
     await loadCurrentUser();
+    await loadSavedPostIds();
     if (!state.currentUser) {
         return;
     }
@@ -445,9 +478,36 @@ async function loadProfilePage() {
 
 async function loadFeedPage() {
     await loadCurrentUser();
+    await loadSavedPostIds();
     const rating = await apiFetch("/users/rating");
     renderRating(rating);
     await loadFeedPosts();
+}
+
+async function loadSavedPage() {
+    if (!requireAuth()) {
+        return;
+    }
+
+    await loadCurrentUser();
+    await loadSavedPostIds();
+
+    try {
+        const posts = await apiFetch("/posts/saved");
+
+        state.posts = [];
+        for (const post of posts) {
+            state.posts.push({
+                ...post,
+                my_reaction: "",
+            });
+        }
+
+        await loadReactionSelections(state.posts);
+        renderFeed(state.posts, "saved-posts-list");
+    } catch (error) {
+        showMessage(error.message, true);
+    }
 }
 
 async function loadUserPage() {
@@ -456,6 +516,7 @@ async function loadUserPage() {
     }
 
     await loadCurrentUser();
+    await loadSavedPostIds();
 
     const userId = currentUserIdFromUrl();
     if (!userId) {
@@ -508,6 +569,11 @@ async function loadUserPage() {
 async function reloadCurrentPage() {
     if (pageName() === "profile") {
         await loadProfilePage();
+        return;
+    }
+
+    if (pageName() === "saved") {
+        await loadSavedPage();
         return;
     }
 
@@ -696,6 +762,26 @@ async function toggleHateFollow() {
     }
 }
 
+async function toggleSavedPost(postId) {
+    if (!requireAuth()) {
+        return;
+    }
+
+    const saved = isPostSaved(postId);
+
+    try {
+        await apiFetch(`/posts/${postId}/save`, {
+            method: saved ? "DELETE" : "POST",
+        });
+
+        await loadSavedPostIds();
+        await reloadCurrentPage();
+        showMessage(saved ? "Post removed from saved." : "Post saved.");
+    } catch (error) {
+        showMessage(error.message, true);
+    }
+}
+
 function showLoginForm() {
     element("login-form").classList.remove("hidden");
     element("register-form").classList.add("hidden");
@@ -877,10 +963,8 @@ async function openPostModal(postId) {
         const canManage = state.currentUser && state.currentUser.id === post.author_id;
         const manageButtons = canManage
             ? `
-                <div class="inline-actions">
-                    <button class="ghost-button small-button" type="button" onclick="editPost(${post.id})">Edit post</button>
-                    <button class="ghost-button delete-button small-button" type="button" onclick="deletePost(${post.id})">Delete post</button>
-                </div>
+                <button class="ghost-button small-button" type="button" onclick="editPost(${post.id})">Edit post</button>
+                <button class="ghost-button delete-button small-button" type="button" onclick="deletePost(${post.id})">Delete post</button>
             `
             : "";
         const commentForm = state.currentUser
@@ -908,7 +992,10 @@ async function openPostModal(postId) {
                     <span>${post.comments_count} comments</span>
                     <span>${post.reactions_count} reactions</span>
                 </div>
-                ${manageButtons}
+                <div class="inline-actions">
+                    ${renderSaveButton(post.id)}
+                    ${manageButtons}
+                </div>
                 <div class="modal-comments">
                     <h4>Comments</h4>
                     ${commentForm}
@@ -1077,6 +1164,7 @@ function renderSinglePost(post) {
 
                 <div class="post-actions-row">
                     <div class="inline-actions">
+                        ${renderSaveButton(post.id)}
                         ${manageButtons}
                     </div>
                 </div>
@@ -1098,6 +1186,7 @@ function renderSinglePost(post) {
 
 async function loadPostPage() {
     await loadCurrentUser();
+    await loadSavedPostIds();
 
     const postId = currentPostIdFromUrl();
     if (!postId) {
@@ -1137,6 +1226,7 @@ async function loadEditPostPage() {
     }
 
     await loadCurrentUser();
+    await loadSavedPostIds();
 
     const postId = currentPostIdFromUrl();
     if (!postId) {
@@ -1187,6 +1277,10 @@ function initEditPostPage() {
     element("edit-post-form").addEventListener("submit", handleEditPostSubmit);
 }
 
+function initSavedPage() {
+    loadSavedPage();
+}
+
 function initUserPage() {
     loadUserPage();
 
@@ -1206,6 +1300,7 @@ window.deletePost = deletePost;
 window.editPost = editPost;
 window.editComment = editComment;
 window.deleteComment = deleteComment;
+window.toggleSavedPost = toggleSavedPost;
 
 initCommonEvents();
 
@@ -1225,6 +1320,10 @@ if (currentPage === "feed") {
 
 if (currentPage === "profile") {
     initProfilePage();
+}
+
+if (currentPage === "saved") {
+    initSavedPage();
 }
 
 if (currentPage === "post") {

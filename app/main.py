@@ -11,6 +11,7 @@ from app.models.achievement import Achievement
 from app.models.hate_follow import HateFollow
 from app.models.post import Post
 from app.models.reaction import Reaction
+from app.models.saved_post import SavedPost
 from app.models.user import User
 from app.models.user_achievement import UserAchievement
 from app.routers.auth import router as auth_router
@@ -65,6 +66,11 @@ def auth_page():
 @app.get("/create-post")
 def create_post_page():
     return FileResponse(TEMPLATES_DIR / "create_fail.html")
+
+
+@app.get("/saved")
+def saved_posts_page():
+    return FileResponse(TEMPLATES_DIR / "saved.html")
 
 
 @app.get("/profile")

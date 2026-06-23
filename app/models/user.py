@@ -20,3 +20,4 @@ class User(Base):
     posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="author", cascade="all, delete-orphan")
     reactions = relationship("Reaction", back_populates="user", cascade="all, delete-orphan")
+    saved_posts = relationship("SavedPost", back_populates="user", cascade="all, delete-orphan")

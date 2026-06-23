@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AntiSocial - Post</title>
+    <title>AntiSocial - Saved Posts</title>
     <link rel="stylesheet" href="/static/css/style.css?v=20">
 </head>
-<body data-page="post">
+<body data-page="saved">
     <div class="page-shell">
         <header class="site-header">
             <div>
                 <h1 class="brand">AntiSocial</h1>
-                <p class="header-subtitle">Single post view with full discussion.</p>
+                <p class="header-subtitle">Your saved posts in one place.</p>
             </div>
             <nav class="top-nav">
                 <a class="nav-link" href="/">Feed</a>
                 <a class="nav-link" href="/create-post">Create post</a>
-                <a class="nav-link" href="/saved">Saved</a>
+                <a class="nav-link active" href="/saved">Saved</a>
                 <a class="nav-link" href="/profile">Profile</a>
                 <a class="nav-link" href="/auth">Auth</a>
             </nav>
@@ -26,21 +26,27 @@
             </div>
         </header>
 
-        <main class="single-column post-page-layout">
-            <section class="panel">
+        <main class="single-column">
+            <section class="panel feed-panel">
                 <div class="card-head">
                     <div>
-                        <h2>Post</h2>
-                        <p class="section-subtitle">Full post content, reactions, and comments.</p>
+                        <h2>Saved posts</h2>
+                        <p class="section-subtitle">Posts you want to come back to later.</p>
                     </div>
-                    <a class="ghost-link-button" href="/">Back to feed</a>
                 </div>
-                <div id="single-post-view"></div>
+                <div id="saved-posts-list" class="feed-list"></div>
             </section>
         </main>
     </div>
 
     <div id="message-box" class="message-box hidden"></div>
+    <div id="post-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closePostModal()"></div>
+        <div class="modal-card">
+            <button class="modal-close" type="button" onclick="closePostModal()">Close</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
     <script src="/static/js/main.js?v=20"></script>
 </body>
 </html>

@@ -31,6 +31,7 @@ class Post(Base):
     author = relationship("User", back_populates="posts")
     comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
     reactions = relationship("Reaction", back_populates="post", cascade="all, delete-orphan")
+    saved_by_users = relationship("SavedPost", back_populates="post", cascade="all, delete-orphan")
 
     @property
     def author_username(self) -> str | None:

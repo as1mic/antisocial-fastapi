@@ -13,6 +13,12 @@ class PostCategory(str, Enum):
     random = "random"
 
 
+class PostSort(str, Enum):
+    newest = "newest"
+    most_discussed = "most_discussed"
+    most_reacted = "most_reacted"
+
+
 class PostBase(BaseModel):
     title: str
     content: str

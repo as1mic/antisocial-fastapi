@@ -362,6 +362,7 @@ async function loadFeedPosts(options = {}) {
     const params = new URLSearchParams();
     const searchInput = element("search-input");
     const categoryInput = element("filter-category");
+    const sortInput = element("filter-sort");
 
     if (searchInput && searchInput.value.trim()) {
         params.set("search", searchInput.value.trim());
@@ -369,6 +370,10 @@ async function loadFeedPosts(options = {}) {
 
     if (categoryInput && categoryInput.value) {
         params.set("category", categoryInput.value);
+    }
+
+    if (sortInput && sortInput.value) {
+        params.set("sort", sortInput.value);
     }
 
     params.set("skip", String(skip));

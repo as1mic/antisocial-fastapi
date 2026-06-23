@@ -1,13 +1,16 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.helpers import get_post_or_404
+from app.models.comment import Comment
 from app.models.post import Post
+from app.models.reaction import Reaction
 from app.models.user import User
-from app.schemas.post import PostCategory, PostOut, PostUpdate
+from app.schemas.post import PostCategory, PostOut, PostSort, PostUpdate
 from app.services.achievement_service import evaluate_user_achievements
 from app.services.file_service import save_uploaded_file
 
@@ -53,10 +56,33 @@ def list_posts(
     limit: int = Query(default=20, ge=1, le=100),
     author_id: int | None = Query(default=None, ge=1),
     category: PostCategory | None = Query(default=None),
+    sort: PostSort = Query(default=PostSort.newest),
     search: str | None = Query(default=None, min_length=1, max_length=100),
     db: Session = Depends(get_db),
 ):
-    query = db.query(Post)
+    comment_counts = (
+        db.query(
+            Comment.post_id.label("post_id"),
+            func.count(Comment.id).label("comments_count"),
+        )
+        .group_by(Comment.post_id)
+        .subquery()
+    )
+
+    reaction_counts = (
+        db.query(
+            Reaction.post_id.label("post_id"),
+            func.count(Reaction.id).label("reactions_count"),
+        )
+        .group_by(Reaction.post_id)
+        .subquery()
+    )
+
+    query = (
+        db.query(Post)
+        .outerjoin(comment_counts, comment_counts.c.post_id == Post.id)
+        .outerjoin(reaction_counts, reaction_counts.c.post_id == Post.id)
+    )
 
     if author_id is not None:
         query = query.filter(Post.author_id == author_id)
@@ -70,9 +96,21 @@ def list_posts(
             Post.title.ilike(text) | Post.content.ilike(text)
         )
 
+    if sort == PostSort.most_discussed:
+        query = query.order_by(
+            func.coalesce(comment_counts.c.comments_count, 0).desc(),
+            Post.created_at.desc(),
+        )
+    elif sort == PostSort.most_reacted:
+        query = query.order_by(
+            func.coalesce(reaction_counts.c.reactions_count, 0).desc(),
+            Post.created_at.desc(),
+        )
+    else:
+        query = query.order_by(Post.created_at.desc())
+
     return (
         query
-        .order_by(Post.created_at.desc())
         .offset(skip)
         .limit(limit)
         .all()

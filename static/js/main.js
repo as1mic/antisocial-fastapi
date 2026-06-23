@@ -25,6 +25,10 @@ function postPageUrl(postId) {
     return `/post/${postId}`;
 }
 
+function editPostPageUrl(postId) {
+    return `/post/${postId}/edit`;
+}
+
 function showMessage(text, isError = false) {
     const box = element("message-box");
     if (!box) {
@@ -525,6 +529,39 @@ async function handleProfileUpdate(event) {
     }
 }
 
+async function handleEditPostSubmit(event) {
+    event.preventDefault();
+
+    if (!requireAuth()) {
+        return;
+    }
+
+    const postId = currentPostIdFromUrl();
+    if (!postId) {
+        showMessage("Post not found.", true);
+        return;
+    }
+
+    const payload = {
+        title: element("edit-post-title").value.trim(),
+        image_url: element("edit-post-image-url").value.trim() || null,
+        content: element("edit-post-content").value.trim(),
+        category: element("edit-post-category").value,
+    };
+
+    try {
+        await apiFetch(`/posts/${postId}`, {
+            method: "PUT",
+            body: JSON.stringify(payload),
+        });
+
+        showMessage("Post updated.");
+        window.location.href = postPageUrl(postId);
+    } catch (error) {
+        showMessage(error.message, true);
+    }
+}
+
 async function handleLogout() {
     saveToken("");
     state.currentUser = null;
@@ -605,46 +642,7 @@ async function submitComment(event, postId) {
 }
 
 async function editPost(postId) {
-    const post = state.posts.find((item) => item.id === postId);
-    if (!post) {
-        return;
-    }
-
-    const title = window.prompt("Edit title", post.title);
-    if (title === null) {
-        return;
-    }
-
-    const content = window.prompt("Edit story", post.content);
-    if (content === null) {
-        return;
-    }
-
-    const imageUrl = window.prompt("Edit image URL", post.image_url || "");
-    if (imageUrl === null) {
-        return;
-    }
-
-    try {
-        await apiFetch(`/posts/${postId}`, {
-            method: "PUT",
-            body: JSON.stringify({
-                title: title.trim(),
-                content: content.trim(),
-                image_url: imageUrl.trim() || null,
-                category: post.category,
-            }),
-        });
-
-        await reloadCurrentPage();
-
-        if (state.openModalPostId === postId) {
-            await openPostModal(postId);
-        }
-        showMessage("Post updated.");
-    } catch (error) {
-        showMessage(error.message, true);
-    }
+    window.location.href = editPostPageUrl(postId);
 }
 
 async function deletePost(postId) {
@@ -878,7 +876,15 @@ function initFeedPage() {
 
 function currentPostIdFromUrl() {
     const parts = window.location.pathname.split("/").filter(Boolean);
-    return Number(parts[parts.length - 1] || 0);
+
+    for (let index = parts.length - 1; index >= 0; index -= 1) {
+        const value = Number(parts[index]);
+        if (Number.isInteger(value) && value > 0) {
+            return value;
+        }
+    }
+
+    return 0;
 }
 
 function renderSinglePost(post) {
@@ -967,6 +973,38 @@ async function loadPostPage() {
     }
 }
 
+async function loadEditPostPage() {
+    if (!requireAuth()) {
+        return;
+    }
+
+    await loadCurrentUser();
+
+    const postId = currentPostIdFromUrl();
+    if (!postId) {
+        showMessage("Post not found.", true);
+        return;
+    }
+
+    try {
+        const post = await apiFetch(`/posts/${postId}`);
+
+        if (!state.currentUser || state.currentUser.id !== post.author_id) {
+            showMessage("You can only edit your own posts.", true);
+            window.location.href = postPageUrl(postId);
+            return;
+        }
+
+        element("edit-post-title").value = post.title || "";
+        element("edit-post-image-url").value = post.image_url || "";
+        element("edit-post-content").value = post.content || "";
+        element("edit-post-category").value = post.category || "random";
+        element("edit-back-link").href = postPageUrl(postId);
+    } catch (error) {
+        showMessage(error.message, true);
+    }
+}
+
 function initProfilePage() {
     loadProfilePage();
     const editButton = element("edit-profile-button");
@@ -984,6 +1022,11 @@ function initProfilePage() {
 
 function initPostPage() {
     loadPostPage();
+}
+
+function initEditPostPage() {
+    loadEditPostPage();
+    element("edit-post-form").addEventListener("submit", handleEditPostSubmit);
 }
 
 window.submitReaction = submitReaction;
@@ -1019,4 +1062,8 @@ if (currentPage === "profile") {
 
 if (currentPage === "post") {
     initPostPage();
+}
+
+if (currentPage === "edit-post") {
+    initEditPostPage();
 }

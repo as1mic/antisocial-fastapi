@@ -77,6 +77,11 @@ def post_page(post_id: int):
     return FileResponse(TEMPLATES_DIR / "post.html")
 
 
+@app.get("/post/{post_id}/edit")
+def edit_post_page(post_id: int):
+    return FileResponse(TEMPLATES_DIR / "edit_post.html")
+
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}

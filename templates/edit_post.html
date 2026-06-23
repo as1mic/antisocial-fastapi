@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AntiSocial - Create Post</title>
+    <title>AntiSocial - Edit Post</title>
     <link rel="stylesheet" href="/static/css/style.css?v=16">
 </head>
-<body data-page="create-post">
+<body data-page="edit-post">
     <div class="page-shell">
         <header class="site-header">
             <div>
                 <h1 class="brand">AntiSocial</h1>
-                <p class="header-subtitle">Create a new public failure post.</p>
+                <p class="header-subtitle">Edit your post without popups.</p>
             </div>
             <nav class="top-nav">
                 <a class="nav-link" href="/">Feed</a>
-                <a class="nav-link active" href="/create-post">Create post</a>
+                <a class="nav-link" href="/create-post">Create post</a>
                 <a class="nav-link" href="/profile">Profile</a>
                 <a class="nav-link" href="/auth">Auth</a>
             </nav>
@@ -29,32 +29,29 @@
             <section class="panel create-page-card">
                 <div class="card-head">
                     <div>
-                        <h2>Create post</h2>
-                        <p class="section-subtitle">Write a short story and publish it to the feed.</p>
+                        <h2>Edit post</h2>
+                        <p class="section-subtitle">Update the text, category, or image link.</p>
                     </div>
+                    <a class="ghost-link-button" id="edit-back-link" href="/">Back</a>
                 </div>
 
-                <form id="post-form" class="stack">
+                <form id="edit-post-form" class="stack">
                     <label class="field">
                         <span>Title</span>
-                        <input id="post-title" type="text" maxlength="150" placeholder="Missed my exam in the wrong building" required>
+                        <input id="edit-post-title" type="text" maxlength="150" required>
                     </label>
                     <label class="field">
                         <span>Image URL</span>
-                        <input id="post-image-url" type="url" placeholder="https://example.com/image.jpg">
-                    </label>
-                    <label class="field">
-                        <span>Upload image</span>
-                        <input id="post-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+                        <input id="edit-post-image-url" type="url" placeholder="https://example.com/image.jpg">
                     </label>
                     <label class="field">
                         <span>Story</span>
-                        <textarea id="post-content" rows="7" placeholder="Describe the disaster..." required></textarea>
+                        <textarea id="edit-post-content" rows="7" required></textarea>
                     </label>
                     <div class="inline-form">
                         <label class="field">
                             <span>Category</span>
-                            <select id="post-category">
+                            <select id="edit-post-category">
                                 <option value="university">University</option>
                                 <option value="work">Work</option>
                                 <option value="transport">Transport</option>
@@ -63,7 +60,7 @@
                                 <option value="random">Random</option>
                             </select>
                         </label>
-                        <button class="primary-button wide-on-mobile" type="submit">Publish</button>
+                        <button class="primary-button wide-on-mobile" type="submit">Save changes</button>
                     </div>
                 </form>
             </section>

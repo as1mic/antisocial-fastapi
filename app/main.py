@@ -73,6 +73,11 @@ def saved_posts_page():
     return FileResponse(TEMPLATES_DIR / "saved.html")
 
 
+@app.get("/activity")
+def activity_page():
+    return FileResponse(TEMPLATES_DIR / "activity.html")
+
+
 @app.get("/profile")
 def profile_page():
     return FileResponse(TEMPLATES_DIR / "profile.html")

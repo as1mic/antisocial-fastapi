@@ -6,11 +6,14 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.helpers import get_user_or_404
 from app.models.achievement import Achievement
+from app.models.comment import Comment
 from app.models.hate_follow import HateFollow
 from app.models.post import Post
+from app.models.reaction import Reaction
 from app.models.user import User
 from app.models.user_achievement import UserAchievement
 from app.schemas.achievement import AchievementOut
+from app.schemas.activity import UserCommentActivityOut, UserReactionActivityOut
 from app.schemas.hate_follow import HateFollowActionResponse, HateFollowOut
 from app.schemas.post import PostOut
 from app.schemas.rating import RatingUserOut
@@ -65,6 +68,72 @@ def update_my_profile(
 @router.get("/rating", response_model=list[RatingUserOut])
 def get_rating(_: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return get_user_rating(db)
+
+
+@router.get("/me/comments", response_model=list[UserCommentActivityOut])
+def list_my_comments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    rows = (
+        db.query(
+            Comment.id,
+            Comment.content,
+            Comment.post_id,
+            Post.title.label("post_title"),
+            Comment.created_at,
+            Comment.updated_at,
+        )
+        .join(Post, Post.id == Comment.post_id)
+        .filter(Comment.author_id == current_user.id)
+        .order_by(Comment.created_at.desc())
+        .all()
+    )
+
+    return [
+        UserCommentActivityOut(
+            id=row.id,
+            content=row.content,
+            post_id=row.post_id,
+            post_title=row.post_title,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+        )
+        for row in rows
+    ]
+
+
+@router.get("/me/reactions", response_model=list[UserReactionActivityOut])
+def list_my_reactions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    rows = (
+        db.query(
+            Reaction.id,
+            Reaction.reaction_type,
+            Reaction.post_id,
+            Post.title.label("post_title"),
+            Reaction.created_at,
+            Reaction.updated_at,
+        )
+        .join(Post, Post.id == Reaction.post_id)
+        .filter(Reaction.user_id == current_user.id)
+        .order_by(Reaction.created_at.desc())
+        .all()
+    )
+
+    return [
+        UserReactionActivityOut(
+            id=row.id,
+            reaction_type=row.reaction_type,
+            post_id=row.post_id,
+            post_title=row.post_title,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+        )
+        for row in rows
+    ]
 
 
 @router.get("/{user_id}", response_model=UserProfile)

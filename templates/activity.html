@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AntiSocial - User</title>
+    <title>AntiSocial - Activity</title>
     <link rel="stylesheet" href="/static/css/style.css?v=22">
 </head>
-<body data-page="user">
+<body data-page="activity">
     <div class="page-shell">
         <header class="site-header">
             <div>
                 <h1 class="brand">AntiSocial</h1>
-                <p class="header-subtitle">Public profile, score, achievements, and posts.</p>
+                <p class="header-subtitle">Your comments, reactions, and saved posts.</p>
             </div>
             <nav class="top-nav">
                 <a class="nav-link" href="/">Feed</a>
                 <a class="nav-link" href="/create-post">Create post</a>
                 <a class="nav-link" href="/saved">Saved</a>
-                <a class="nav-link" href="/activity">Activity</a>
+                <a class="nav-link active" href="/activity">Activity</a>
                 <a class="nav-link" href="/profile">Profile</a>
                 <a class="nav-link" href="/auth">Auth</a>
             </nav>
@@ -28,54 +28,34 @@
         </header>
 
         <main class="layout profile-layout">
-            <section class="panel profile-panel">
+            <section class="panel profile-posts-panel">
                 <div class="card-head">
                     <div>
-                        <h2 id="view-user-name">User profile</h2>
-                        <p class="section-subtitle">Public account details and stats.</p>
-                    </div>
-                    <div class="profile-actions-row">
-                        <a class="ghost-link-button" href="/">Back to feed</a>
-                        <button id="hate-follow-button" class="primary-button" type="button">Hate-follow</button>
+                        <h2>Your comments</h2>
+                        <p class="section-subtitle">Recent comments you wrote.</p>
                     </div>
                 </div>
-
-                <p id="view-user-bio" class="muted-text">Loading profile...</p>
-
-                <div class="stats-grid">
-                    <article>
-                        <span class="stat-number" id="view-user-haters">0</span>
-                        <span class="stat-label">Haters</span>
-                    </article>
-                    <article>
-                        <span class="stat-number" id="view-user-posts-count">0</span>
-                        <span class="stat-label">Posts</span>
-                    </article>
-                    <article>
-                        <span class="stat-number" id="view-user-score">0</span>
-                        <span class="stat-label">Score</span>
-                    </article>
-                </div>
+                <div id="activity-comments-list" class="simple-list"></div>
             </section>
 
             <section class="panel">
                 <div class="card-head">
                     <div>
-                        <h2>Achievements</h2>
-                        <p class="section-subtitle">Unlocked public milestones.</p>
+                        <h2>Your reactions</h2>
+                        <p class="section-subtitle">Latest reactions you left on posts.</p>
                     </div>
                 </div>
-                <div id="achievement-list" class="simple-list"></div>
+                <div id="activity-reactions-list" class="simple-list"></div>
             </section>
 
             <section class="panel profile-posts-panel">
                 <div class="card-head">
                     <div>
-                        <h2>User posts</h2>
-                        <p class="section-subtitle">Posts published by this user.</p>
+                        <h2>Saved posts</h2>
+                        <p class="section-subtitle">Posts you bookmarked for later.</p>
                     </div>
                 </div>
-                <div id="user-posts-list" class="feed-list"></div>
+                <div id="activity-saved-posts-list" class="feed-list"></div>
             </section>
         </main>
     </div>

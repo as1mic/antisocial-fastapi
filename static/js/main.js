@@ -54,6 +54,100 @@ function showMessage(text, isError = false) {
     }, 3000);
 }
 
+function ensureImageViewer() {
+    let viewer = element("image-viewer");
+    if (viewer) {
+        return viewer;
+    }
+
+    viewer = document.createElement("div");
+    viewer.id = "image-viewer";
+    viewer.className = "image-viewer hidden";
+    viewer.innerHTML = `
+        <div class="image-viewer-backdrop" onclick="closeImageViewer()"></div>
+        <div class="image-viewer-content">
+            <button class="image-viewer-close" type="button" onclick="closeImageViewer()">Close</button>
+            <img id="image-viewer-photo" class="image-viewer-photo" alt="Preview">
+        </div>
+    `;
+
+    document.body.appendChild(viewer);
+    return viewer;
+}
+
+function openImageViewer(imageUrl) {
+    const viewer = ensureImageViewer();
+    const photo = element("image-viewer-photo");
+    if (!photo) {
+        return;
+    }
+
+    photo.src = imageUrl;
+    viewer.classList.remove("hidden");
+}
+
+function closeImageViewer() {
+    const viewer = element("image-viewer");
+    const photo = element("image-viewer-photo");
+
+    if (viewer) {
+        viewer.classList.add("hidden");
+    }
+
+    if (photo) {
+        photo.removeAttribute("src");
+    }
+}
+
+function setImagePreview(previewBoxId, previewImageId, imageUrl) {
+    const box = element(previewBoxId);
+    const image = element(previewImageId);
+
+    if (!box || !image) {
+        return;
+    }
+
+    if (!imageUrl) {
+        box.classList.add("hidden");
+        image.removeAttribute("src");
+        return;
+    }
+
+    image.src = imageUrl;
+    box.classList.remove("hidden");
+}
+
+async function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function () {
+            resolve(String(reader.result || ""));
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+async function refreshCreatePostImagePreview() {
+    const imageFileInput = element("post-image-file");
+    const imageUrlInput = element("post-image-url");
+
+    if (imageFileInput && imageFileInput.files && imageFileInput.files[0]) {
+        const dataUrl = await readFileAsDataUrl(imageFileInput.files[0]);
+        setImagePreview("post-image-preview-box", "post-image-preview", dataUrl);
+        return;
+    }
+
+    const imageUrl = imageUrlInput ? imageUrlInput.value.trim() : "";
+    setImagePreview("post-image-preview-box", "post-image-preview", imageUrl);
+}
+
+function refreshEditPostImagePreview() {
+    const imageUrlInput = element("edit-post-image-url");
+    const imageUrl = imageUrlInput ? imageUrlInput.value.trim() : "";
+    setImagePreview("edit-post-image-preview-box", "edit-post-image-preview", imageUrl);
+}
+
 async function apiFetch(url, options = {}) {
     const isFormData = options.body instanceof FormData;
     const headers = { ...(options.headers || {}) };
@@ -103,7 +197,9 @@ function escapeHtml(text) {
     return String(text)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
 }
 
 function updateHeader() {
@@ -282,7 +378,7 @@ function renderSaveButton(postId) {
 function renderPostCard(post) {
     const comments = state.commentsByPost[post.id] || [];
     const imageHtml = post.image_url
-        ? `<img class="post-image" src="${escapeHtml(post.image_url)}" alt="Post image" onclick="openPostModal(${post.id})">`
+        ? `<img class="post-image" src="${escapeHtml(post.image_url)}" alt="Post image" onclick="openImageViewer(this.src)">`
         : "";
     const canManage = state.currentUser && state.currentUser.id === post.author_id;
     const manageButtons = canManage
@@ -664,6 +760,7 @@ async function handleCreatePost(event) {
 
         element("post-form").reset();
         element("post-category").value = "university";
+        setImagePreview("post-image-preview-box", "post-image-preview", "");
         showMessage("Post published.");
         window.location.href = "/";
     } catch (error) {
@@ -958,7 +1055,7 @@ async function openPostModal(postId) {
         }
 
         const imageHtml = post.image_url
-            ? `<img class="modal-image" src="${escapeHtml(post.image_url)}" alt="Post image">`
+            ? `<img class="modal-image" src="${escapeHtml(post.image_url)}" alt="Post image" onclick="openImageViewer(this.src)">`
             : "";
         const canManage = state.currentUser && state.currentUser.id === post.author_id;
         const manageButtons = canManage
@@ -1053,6 +1150,12 @@ function initCommonEvents() {
     if (logoutButton) {
         logoutButton.addEventListener("click", handleLogout);
     }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeImageViewer();
+        }
+    });
 }
 
 function initAuthPage() {
@@ -1070,6 +1173,8 @@ function initCreatePostPage() {
 
     loadCurrentUser();
     element("post-form").addEventListener("submit", handleCreatePost);
+    element("post-image-url").addEventListener("input", refreshCreatePostImagePreview);
+    element("post-image-file").addEventListener("change", refreshCreatePostImagePreview);
 }
 
 function initFeedPage() {
@@ -1125,7 +1230,7 @@ function renderSinglePost(post) {
 
     const comments = state.commentsByPost[post.id] || [];
     const imageHtml = post.image_url
-        ? `<img class="post-image" src="${escapeHtml(post.image_url)}" alt="Post image">`
+        ? `<img class="post-image" src="${escapeHtml(post.image_url)}" alt="Post image" onclick="openImageViewer(this.src)">`
         : "";
     const canManage = state.currentUser && state.currentUser.id === post.author_id;
     const manageButtons = canManage
@@ -1248,6 +1353,7 @@ async function loadEditPostPage() {
         element("edit-post-content").value = post.content || "";
         element("edit-post-category").value = post.category || "random";
         element("edit-back-link").href = postPageUrl(postId);
+        refreshEditPostImagePreview();
     } catch (error) {
         showMessage(error.message, true);
     }
@@ -1275,6 +1381,7 @@ function initPostPage() {
 function initEditPostPage() {
     loadEditPostPage();
     element("edit-post-form").addEventListener("submit", handleEditPostSubmit);
+    element("edit-post-image-url").addEventListener("input", refreshEditPostImagePreview);
 }
 
 function initSavedPage() {
@@ -1301,6 +1408,8 @@ window.editPost = editPost;
 window.editComment = editComment;
 window.deleteComment = deleteComment;
 window.toggleSavedPost = toggleSavedPost;
+window.openImageViewer = openImageViewer;
+window.closeImageViewer = closeImageViewer;
 
 initCommonEvents();
 

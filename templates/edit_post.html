@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AntiSocial - Edit Post</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20">
+    <link rel="stylesheet" href="/static/css/style.css?v=21">
 </head>
 <body data-page="edit-post">
     <div class="page-shell">
@@ -45,6 +45,9 @@
                         <span>Image URL</span>
                         <input id="edit-post-image-url" type="url" placeholder="https://example.com/image.jpg">
                     </label>
+                    <div id="edit-post-image-preview-box" class="image-preview-box hidden">
+                        <img id="edit-post-image-preview" class="image-preview" alt="Edit preview">
+                    </div>
                     <label class="field">
                         <span>Story</span>
                         <textarea id="edit-post-content" rows="7" required></textarea>
@@ -69,6 +72,6 @@
     </div>
 
     <div id="message-box" class="message-box hidden"></div>
-    <script src="/static/js/main.js?v=20"></script>
+    <script src="/static/js/main.js?v=21"></script>
 </body>
 </html>

@@ -450,6 +450,22 @@ textarea {
     cursor: pointer;
 }
 
+.image-preview-box {
+    margin-top: 2px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel-2);
+}
+
+.image-preview {
+    display: block;
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
 .post-meta {
     margin-top: 12px;
     color: var(--muted);
@@ -665,6 +681,7 @@ textarea {
     margin-top: 14px;
     border: 1px solid var(--border);
     border-radius: 12px;
+    cursor: zoom-in;
 }
 
 .modal-comments {
@@ -683,6 +700,48 @@ textarea {
 .single-post-shell {
     display: grid;
     gap: 16px;
+}
+
+.image-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 260;
+}
+
+.image-viewer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 7, 10, 0.9);
+}
+
+.image-viewer-content {
+    position: relative;
+    width: min(1100px, calc(100% - 32px));
+    max-height: calc(100vh - 32px);
+    margin: 16px auto;
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+}
+
+.image-viewer-close {
+    justify-self: end;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(20, 24, 32, 0.92);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.image-viewer-photo {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: calc(100vh - 90px);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
 }
 
 .hidden {

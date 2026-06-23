@@ -13,10 +13,15 @@ function initCommonEvents() {
 
 function initAuthPage() {
     loadCurrentUser();
+    loadAuthOnboarding();
     element("show-login").addEventListener("click", showLoginForm);
     element("show-register").addEventListener("click", showRegisterForm);
     element("login-form").addEventListener("submit", handleLogin);
     element("register-form").addEventListener("submit", handleRegister);
+    const demoSeedButton = element("demo-seed-button");
+    if (demoSeedButton) {
+        demoSeedButton.addEventListener("click", handleDemoSeed);
+    }
 }
 
 function initCreatePostPage() {

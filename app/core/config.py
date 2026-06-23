@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     secret_key: str = "change_this_secret_key_for_production"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    demo_seed_enabled: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -315,3 +315,28 @@ function renderSinglePost(post) {
         </div>
     `;
 }
+
+function renderDemoCredentials(items) {
+    const container = element("demo-credentials-box");
+    if (!container) {
+        return;
+    }
+
+    if (!items.length) {
+        container.classList.add("hidden");
+        container.innerHTML = "";
+        return;
+    }
+
+    container.classList.remove("hidden");
+    container.innerHTML = items.map(function (item) {
+        return `
+            <div class="list-row">
+                <div>
+                    <strong>@${escapeHtml(item.username)}</strong>
+                    <span>${escapeHtml(item.email)} | password: ${escapeHtml(item.password)}</span>
+                </div>
+            </div>
+        `;
+    }).join("");
+}

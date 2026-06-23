@@ -94,6 +94,20 @@ async function loadFeedPage() {
     const rating = await apiFetch("/users/rating");
     renderRating(rating);
     await loadFeedPosts();
+
+    const feedDemoText = element("feed-demo-text");
+    if (feedDemoText) {
+        try {
+            const demoStatus = await loadDemoStatus();
+            if (demoStatus.seeded) {
+                feedDemoText.textContent = "Demo content is ready. Login with demo_owner / demo123 on the auth page.";
+            } else if (demoStatus.enabled) {
+                feedDemoText.textContent = "Demo mode is enabled. Open the auth page and fill demo data in one click.";
+            }
+        } catch (error) {
+            feedDemoText.textContent = "Demo onboarding is unavailable right now.";
+        }
+    }
 }
 
 async function loadSavedPage() {
@@ -149,6 +163,39 @@ async function loadActivityPage() {
         renderFeed(state.posts, "activity-saved-posts-list");
     } catch (error) {
         showMessage(error.message, true);
+    }
+}
+
+async function loadAuthOnboarding() {
+    const statusText = element("demo-status-text");
+    const seedButton = element("demo-seed-button");
+
+    if (!statusText || !seedButton) {
+        return;
+    }
+
+    try {
+        const demoStatus = await loadDemoStatus();
+
+        if (!demoStatus.enabled) {
+            statusText.textContent = "Demo seeding is disabled. You can still register manually.";
+            seedButton.classList.add("hidden");
+            renderDemoCredentials([]);
+            return;
+        }
+
+        if (demoStatus.seeded) {
+            statusText.textContent = "Demo data is already loaded. You can sign in with the accounts below.";
+        } else {
+            statusText.textContent = "Demo mode is enabled. Press the button below to create showcase data.";
+        }
+
+        seedButton.classList.remove("hidden");
+        renderDemoCredentials(demoStatus.credentials || []);
+    } catch (error) {
+        statusText.textContent = "Could not load demo onboarding right now.";
+        seedButton.classList.add("hidden");
+        renderDemoCredentials([]);
     }
 }
 

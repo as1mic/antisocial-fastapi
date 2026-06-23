@@ -43,6 +43,31 @@ async function handleRegister(event) {
     }
 }
 
+async function handleDemoSeed() {
+    const button = element("demo-seed-button");
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Creating...";
+    }
+
+    try {
+        const result = await apiFetch("/demo/seed", {
+            method: "POST",
+        });
+
+        renderDemoCredentials(result.credentials || []);
+        await loadAuthOnboarding();
+        showMessage("Demo data created.");
+    } catch (error) {
+        showMessage(error.message, true);
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = "Fill demo data";
+        }
+    }
+}
+
 async function handleCreatePost(event) {
     event.preventDefault();
 

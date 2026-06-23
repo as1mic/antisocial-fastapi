@@ -93,6 +93,10 @@ function isPostSaved(postId) {
     return state.savedPostIds.includes(postId);
 }
 
+async function loadDemoStatus() {
+    return apiFetch("/demo/status");
+}
+
 async function loadReactionSelections(posts) {
     if (!state.currentUser || !posts.length) {
         return;

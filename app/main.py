@@ -16,6 +16,7 @@ from app.models.user import User
 from app.models.user_achievement import UserAchievement
 from app.routers.auth import router as auth_router
 from app.routers.comments import router as comments_router
+from app.routers.demo import router as demo_router
 from app.routers.posts import router as posts_router
 from app.routers.reactions import router as reactions_router
 from app.routers.users import router as users_router
@@ -45,6 +46,7 @@ def on_startup():
 
 app.include_router(auth_router)
 app.include_router(comments_router)
+app.include_router(demo_router)
 app.include_router(posts_router)
 app.include_router(reactions_router)
 app.include_router(users_router)

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AntiSocial - Auth</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=23">
+    <link rel="stylesheet" href="/static/css/style.css?v=24">
 </head>
 <body data-page="auth">
     <div class="page-shell">
@@ -29,6 +29,22 @@
         </header>
 
         <main class="single-column">
+            <section class="panel auth-page-card">
+                <div class="card-head">
+                    <div>
+                        <h2>Quick start</h2>
+                        <p class="section-subtitle">Fill the app with demo users and content for a faster showcase.</p>
+                    </div>
+                </div>
+                <div class="stack">
+                    <p id="demo-status-text" class="muted-text">Checking demo mode...</p>
+                    <div class="inline-actions">
+                        <button id="demo-seed-button" class="ghost-button hidden" type="button">Fill demo data</button>
+                    </div>
+                    <div id="demo-credentials-box" class="simple-list hidden"></div>
+                </div>
+            </section>
+
             <section class="auth-card auth-page-card">
                 <div class="card-head">
                     <div>
@@ -77,6 +93,6 @@
     </div>
 
     <div id="message-box" class="message-box hidden"></div>
-    <script src="/static/js/app-loader.js?v=23"></script>
+    <script src="/static/js/app-loader.js?v=24"></script>
 </body>
 </html>

@@ -78,6 +78,11 @@ def activity_page():
     return FileResponse(TEMPLATES_DIR / "activity.html")
 
 
+@app.get("/settings")
+def settings_page():
+    return FileResponse(TEMPLATES_DIR / "settings.html")
+
+
 @app.get("/profile")
 def profile_page():
     return FileResponse(TEMPLATES_DIR / "profile.html")

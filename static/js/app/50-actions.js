@@ -82,9 +82,9 @@ async function handleProfileUpdate(event) {
     event.preventDefault();
 
     const payload = {
-        username: element("profile-username").value.trim(),
-        email: element("profile-email").value.trim(),
-        bio: element("profile-bio-input").value.trim(),
+        username: element("settings-username").value.trim(),
+        email: element("settings-email").value.trim(),
+        bio: element("settings-bio").value.trim(),
     };
 
     try {
@@ -93,9 +93,29 @@ async function handleProfileUpdate(event) {
             body: JSON.stringify(payload),
         });
 
-        element("profile-form").classList.add("hidden");
-        await loadProfilePage();
+        await loadSettingsPage();
         showMessage("Profile updated.");
+    } catch (error) {
+        showMessage(error.message, true);
+    }
+}
+
+async function handlePasswordUpdate(event) {
+    event.preventDefault();
+
+    const payload = {
+        current_password: element("settings-current-password").value,
+        new_password: element("settings-new-password").value,
+    };
+
+    try {
+        await apiFetch("/users/me/password", {
+            method: "PATCH",
+            body: JSON.stringify(payload),
+        });
+
+        element("settings-password-form").reset();
+        showMessage("Password updated.");
     } catch (error) {
         showMessage(error.message, true);
     }

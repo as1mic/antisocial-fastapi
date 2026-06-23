@@ -152,6 +152,23 @@ async function loadActivityPage() {
     }
 }
 
+async function loadSettingsPage() {
+    if (!requireAuth()) {
+        return;
+    }
+
+    await loadCurrentUser();
+    if (!state.currentUser) {
+        return;
+    }
+
+    const profile = await apiFetch(`/users/${state.currentUser.id}`);
+
+    element("settings-username").value = profile.username || "";
+    element("settings-email").value = profile.email || "";
+    element("settings-bio").value = profile.bio || "";
+}
+
 async function loadUserPage() {
     if (!requireAuth()) {
         return;
@@ -293,6 +310,11 @@ async function reloadCurrentPage() {
 
     if (pageName() === "activity") {
         await loadActivityPage();
+        return;
+    }
+
+    if (pageName() === "settings") {
+        await loadSettingsPage();
         return;
     }
 

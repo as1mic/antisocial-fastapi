@@ -17,9 +17,10 @@ from app.schemas.activity import UserCommentActivityOut, UserReactionActivityOut
 from app.schemas.hate_follow import HateFollowActionResponse, HateFollowOut
 from app.schemas.post import PostOut
 from app.schemas.rating import RatingUserOut
-from app.schemas.user import UserOut, UserProfile, UserUpdate
+from app.schemas.user import UserOut, UserPasswordUpdate, UserProfile, UserUpdate
 from app.services.achievement_service import evaluate_user_achievements
 from app.services.auth_service import get_user_by_email, get_user_by_username
+from app.core.security import get_password_hash, verify_password
 from app.services.rating_service import get_user_rating
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -63,6 +64,24 @@ def update_my_profile(
     db.refresh(current_user)
 
     return current_user
+
+
+@router.patch("/me/password")
+def update_my_password(
+    password_data: UserPasswordUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(password_data.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+
+    current_user.hashed_password = get_password_hash(password_data.new_password)
+    db.commit()
+
+    return {"message": "Password updated successfully"}
 
 
 @router.get("/rating", response_model=list[RatingUserOut])

@@ -50,3 +50,8 @@ class UserUpdate(BaseModel):
     username: str | None = None
     email: EmailStr | None = None
     bio: str | None = Field(default=None, max_length=500)
+
+
+class UserPasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=6, max_length=128)

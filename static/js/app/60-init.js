@@ -51,17 +51,6 @@ function initFeedPage() {
 
 function initProfilePage() {
     loadProfilePage();
-    const editButton = element("edit-profile-button");
-    const cancelButton = element("cancel-profile-edit");
-    const profileForm = element("profile-form");
-
-    editButton.addEventListener("click", function () {
-        element("profile-form").classList.toggle("hidden");
-    });
-    cancelButton.addEventListener("click", function () {
-        profileForm.classList.add("hidden");
-    });
-    profileForm.addEventListener("submit", handleProfileUpdate);
 }
 
 function initPostPage() {
@@ -80,6 +69,13 @@ function initSavedPage() {
 
 function initActivityPage() {
     loadActivityPage();
+}
+
+function initSettingsPage() {
+    loadSettingsPage();
+    element("settings-profile-form").addEventListener("submit", handleProfileUpdate);
+    element("settings-password-form").addEventListener("submit", handlePasswordUpdate);
+    element("settings-logout-button").addEventListener("click", handleLogout);
 }
 
 function initUserPage() {
@@ -131,6 +127,10 @@ if (currentPage === "saved") {
 
 if (currentPage === "activity") {
     initActivityPage();
+}
+
+if (currentPage === "settings") {
+    initSettingsPage();
 }
 
 if (currentPage === "post") {

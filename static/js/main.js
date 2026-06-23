@@ -4,6 +4,8 @@ const state = {
     posts: [],
     commentsByPost: {},
     openModalPostId: null,
+    feedPageSize: 6,
+    feedHasMore: false,
 };
 
 const reactionLabels = {
@@ -323,6 +325,17 @@ function renderFeed(posts, containerId) {
     container.innerHTML = posts.map(renderPostCard).join("");
 }
 
+function updateLoadMoreButton() {
+    const button = element("load-more-button");
+    if (!button) {
+        return;
+    }
+
+    button.classList.toggle("hidden", !state.feedHasMore);
+    button.disabled = false;
+    button.textContent = "Load more";
+}
+
 async function loadReactionSelections(posts) {
     if (!state.currentUser || !posts.length) {
         return;
@@ -338,7 +351,10 @@ async function loadReactionSelections(posts) {
     }
 }
 
-async function loadFeedPosts() {
+async function loadFeedPosts(options = {}) {
+    const append = options.append || false;
+    const limit = options.customLimit || state.feedPageSize;
+    const skip = append ? state.posts.length : 0;
     const params = new URLSearchParams();
     const searchInput = element("search-input");
     const categoryInput = element("filter-category");
@@ -351,19 +367,31 @@ async function loadFeedPosts() {
         params.set("category", categoryInput.value);
     }
 
+    params.set("skip", String(skip));
+    params.set("limit", String(limit));
+
     const url = params.toString() ? `/posts?${params.toString()}` : "/posts";
     const posts = await apiFetch(url);
+    const preparedPosts = [];
 
-    state.posts = [];
     for (const post of posts) {
-        state.posts.push({
+        preparedPosts.push({
             ...post,
             my_reaction: "",
         });
     }
 
-    await loadReactionSelections(state.posts);
+    await loadReactionSelections(preparedPosts);
+
+    if (append) {
+        state.posts = state.posts.concat(preparedPosts);
+    } else {
+        state.posts = preparedPosts;
+    }
+
+    state.feedHasMore = posts.length === limit;
     renderFeed(state.posts, "feed-list");
+    updateLoadMoreButton();
 }
 
 async function loadProfilePage() {
@@ -424,7 +452,9 @@ async function reloadCurrentPage() {
         return;
     }
 
-    await loadFeedPosts();
+    await loadFeedPosts({
+        customLimit: Math.max(state.posts.length, state.feedPageSize),
+    });
 }
 
 async function handleLogin(event) {
@@ -825,11 +855,7 @@ async function submitModalComment(event, postId) {
         input.value = "";
         await openPostModal(postId);
 
-        if (pageName() === "profile") {
-            await loadProfilePage();
-        } else {
-            await loadFeedPosts();
-        }
+        await reloadCurrentPage();
 
         showMessage("Comment added.");
     } catch (error) {
@@ -864,6 +890,8 @@ function initCreatePostPage() {
 function initFeedPage() {
     loadFeedPage();
     const form = element("filter-form");
+    const loadMoreButton = element("load-more-button");
+
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
         try {
@@ -872,6 +900,10 @@ function initFeedPage() {
             showMessage(error.message, true);
         }
     });
+
+    if (loadMoreButton) {
+        loadMoreButton.addEventListener("click", loadMoreFeedPosts);
+    }
 }
 
 function currentPostIdFromUrl() {
@@ -970,6 +1002,21 @@ async function loadPostPage() {
         renderSinglePost(state.posts[0]);
     } catch (error) {
         showMessage(error.message, true);
+    }
+}
+
+async function loadMoreFeedPosts() {
+    const button = element("load-more-button");
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Loading...";
+    }
+
+    try {
+        await loadFeedPosts({ append: true });
+    } catch (error) {
+        showMessage(error.message, true);
+        updateLoadMoreButton();
     }
 }
 

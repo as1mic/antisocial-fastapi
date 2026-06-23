@@ -320,6 +320,12 @@ textarea {
     margin-bottom: 14px;
 }
 
+.feed-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+
 .filters .secondary-button {
     min-width: 92px;
 }

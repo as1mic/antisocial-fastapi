@@ -40,10 +40,12 @@ function showMessage(text, isError = false) {
 }
 
 async function apiFetch(url, options = {}) {
-    const headers = {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-    };
+    const isFormData = options.body instanceof FormData;
+    const headers = { ...(options.headers || {}) };
+
+    if (!isFormData) {
+        headers["Content-Type"] = "application/json";
+    }
 
     if (state.token) {
         headers.Authorization = `Bearer ${state.token}`;
@@ -452,17 +454,22 @@ async function handleCreatePost(event) {
         return;
     }
 
-    const payload = {
-        title: element("post-title").value.trim(),
-        image_url: element("post-image-url").value.trim() || null,
-        content: element("post-content").value.trim(),
-        category: element("post-category").value,
-    };
+    const formData = new FormData();
+    const imageFile = element("post-image-file").files[0];
+
+    formData.append("title", element("post-title").value.trim());
+    formData.append("image_url", element("post-image-url").value.trim());
+    formData.append("content", element("post-content").value.trim());
+    formData.append("category", element("post-category").value);
+
+    if (imageFile) {
+        formData.append("image", imageFile);
+    }
 
     try {
         await apiFetch("/posts", {
             method: "POST",
-            body: JSON.stringify(payload),
+            body: formData,
         });
 
         element("post-form").reset();

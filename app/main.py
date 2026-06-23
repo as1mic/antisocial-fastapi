@@ -29,10 +29,12 @@ app = FastAPI(
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "static"
 TEMPLATES_DIR = BASE_DIR / "templates"
+UPLOADS_DIR = BASE_DIR / "uploads"
 
 
 @app.on_event("startup")
 def on_startup():
+    UPLOADS_DIR.mkdir(exist_ok=True)
     db = SessionLocal()
     try:
         ensure_default_achievements(db)
@@ -47,6 +49,7 @@ app.include_router(reactions_router)
 app.include_router(users_router)
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 
 @app.get("/")

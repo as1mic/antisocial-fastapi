@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 
 from sqlalchemy.orm import Session
 
@@ -7,8 +7,9 @@ from app.core.dependencies import get_current_user
 from app.core.helpers import get_post_or_404
 from app.models.post import Post
 from app.models.user import User
-from app.schemas.post import PostCategory, PostCreate, PostOut, PostUpdate
+from app.schemas.post import PostCategory, PostOut, PostUpdate
 from app.services.achievement_service import evaluate_user_achievements
+from app.services.file_service import save_uploaded_file
 
 router = APIRouter(
     prefix="/posts",
@@ -18,15 +19,24 @@ router = APIRouter(
 
 @router.post("", response_model=PostOut, status_code=status.HTTP_201_CREATED)
 def create_post(
-    post_data: PostCreate,
+    title: str = Form(...),
+    content: str = Form(...),
+    category: PostCategory = Form(...),
+    image_url: str | None = Form(default=None),
+    image: UploadFile | None = File(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    final_image_url = image_url.strip() if image_url else None
+
+    if image is not None and image.filename:
+        final_image_url = save_uploaded_file(image)
+
     post = Post(
-        title=post_data.title,
-        content=post_data.content,
-        image_url=post_data.image_url,
-        category=post_data.category.value,
+        title=title,
+        content=content,
+        image_url=final_image_url,
+        category=category.value,
         author_id=current_user.id,
     )
     db.add(post)

@@ -15,7 +15,7 @@ def demo_status(db: Session = Depends(get_db)):
     return {
         "enabled": settings.demo_seed_enabled,
         "seeded": is_demo_seeded(db),
-        "credentials": demo_credentials(),
+        "credentials": demo_credentials() if settings.demo_public_credentials else [],
     }
 
 

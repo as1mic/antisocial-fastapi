@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     demo_seed_enabled: bool = False
+    demo_public_credentials: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -71,10 +71,6 @@ async function loadProfilePage() {
     element("profile-posts").textContent = String(posts.length);
     element("profile-score").textContent = myRating ? String(myRating.score) : "0";
 
-    element("profile-username").value = profile.username || "";
-    element("profile-email").value = profile.email || "";
-    element("profile-bio-input").value = profile.bio || "";
-
     state.posts = [];
     for (const post of posts) {
         state.posts.push({
@@ -185,7 +181,7 @@ async function loadAuthOnboarding() {
         }
 
         if (demoStatus.seeded) {
-            statusText.textContent = "Demo data is already loaded. You can sign in with the accounts below.";
+            statusText.textContent = "Demo data is already loaded. You can sign in with the demo accounts if they are enabled in server settings.";
         } else {
             statusText.textContent = "Demo mode is enabled. Press the button below to create showcase data.";
         }

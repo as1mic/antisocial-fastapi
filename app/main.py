@@ -33,10 +33,11 @@ STATIC_DIR = BASE_DIR / "static"
 TEMPLATES_DIR = BASE_DIR / "templates"
 UPLOADS_DIR = BASE_DIR / "uploads"
 
+UPLOADS_DIR.mkdir(exist_ok=True)
+
 
 @app.on_event("startup")
 def on_startup():
-    UPLOADS_DIR.mkdir(exist_ok=True)
     db = SessionLocal()
     try:
         ensure_default_achievements(db)

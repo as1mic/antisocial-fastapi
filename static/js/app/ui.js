@@ -126,6 +126,7 @@ function escapeHtml(text) {
 function updateHeader() {
     const badge = element("session-badge");
     const logoutButton = element("logout-button");
+    const authLinks = document.querySelectorAll('.top-nav a[href="/auth"]');
 
     if (badge) {
         badge.textContent = state.currentUser
@@ -136,4 +137,8 @@ function updateHeader() {
     if (logoutButton) {
         logoutButton.classList.toggle("hidden", !state.currentUser);
     }
+
+    authLinks.forEach(function (link) {
+        link.classList.toggle("hidden", Boolean(state.currentUser));
+    });
 }
